@@ -1,5 +1,5 @@
 import axios from "axios";
-import router from "../router";
+
 const service = axios.create({
   withCredentials: true,
   timeout: 0,
@@ -18,6 +18,7 @@ service.interceptors.request.use(
     return Promise.reject(error);
   }
 );
+
 service.interceptors.response.use(
   async function (res) {
     if (res.data.status_code === 200 || res.data.access_token) {
@@ -25,23 +26,19 @@ service.interceptors.response.use(
       return res;
     }
     if (res.data.status_code === 401) {
-      if (router.currentRoute.meta && router.currentRoute.meta.requiresAuth) {
-        console.log("failedtoken");
-        return Promise.reject(res);
-      } else {
-        return res;
-      }
+      console.log("failedtoken");
+      return Promise.reject(res);
     } else {
       return res;
     }
   },
   function (error) {
     // forbidden
-    if (error.response.status == 408) {
+    if (error.response?.status === 408) {
       //route to forbidden page
       console.log();
     }
-    return Promise.reject(error.response.data);
+    return Promise.reject(error.response?.data || error);
   }
 );
 
